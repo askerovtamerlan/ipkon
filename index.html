@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>ipkon's map</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+
+
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.css' rel='stylesheet' />
+
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.js'></script>
+    <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .btn-control {
+            font: bold 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+            background-color: #3386c0;
+            color: #fff;
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            z-index: 1;
+            border: none;
+            width: 200px;
+            margin-left: -100px;
+            display: block;
+            cursor: pointer;
+            padding: 10px 20px;
+            border-radius: 3px;
+        }
+
+        .btn-control:hover {
+            background-color: #4ea0da;
+        }
+
+    </style>
+
+</head>
+
+<body>
+    <div id='map' style='width: 1400px; height: 1300px;'></div>
+    <button id="zoomto" class="btn-control">Zoom to bounds</button>
+
+
+
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoiaG9va2FobG9jYXRvciIsImEiOiI5WnJEQTBBIn0.DrAlI7fhFaYr2RcrWWocgw';
+
+        const bounds = [
+            [
+                9.871121177335397,
+                3.1604821038190067
+            ],
+            [
+                54.71246842769622,
+                33.68387384390269
+            ]
+        ]
+
+
+        const map = new mapboxgl.Map({
+            container: 'map',
+            // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
+            style: 'mapbox://styles/mapbox/light-v11',
+            zoom: 4,
+            center: [31.373985216265538,
+                20.720896730190887
+            ],
+            projection: 'mercator',
+            maxBounds: bounds
+        });
+
+
+        let isolines = []
+        let sensors = []
+        let blocks = []
+
+        let urls = ['./isolines.json', './']
+
+        let url = ['./forexample.geojson']
+
+        let isoliness = []
+        //        let featuresOfIsolines = {}
+
+        async function exampleFetch() {
+            const response = await fetch('./forexample.geojson')
+            const json = await response.json()
+            return json
+        }
+
+        exampleFetch().then(res => {
+            console.log(res)
+            isoliness = {
+                "type": "FeatureCollection",
+                "features": res.features.map(line => turf.bezierSpline(line, {
+                    properties: {
+                        power: line.properties.power
+                    }
+                }))
+            }
+
+            console.log(isoliness)
+
+            map.addLayer({
+                'id': 'isoliness',
+                'source': {
+                    "type": "geojson",
+                    "data": isoliness,
+                },
+                "type": "line",
+                "paint": {
+                    "line-color": "#FF0000",
+                    "line-width": 3,
+                    'line-opacity': 0.25
+                }
+
+            })
+        })
+
+
+
+
+        //        console.log(isoliness)
+
+        fetch('isolines.json')
+            .then((response) => {
+                return response.json();
+            })
+            .then((data) => {
+                //                console.log(data)
+                data.isolines.forEach((el, index) => {
+                    Object.keys(el.data).forEach(key => {
+                        //                        console.log(key)
+                        isolines.push({
+                            "type": "Feature",
+                            "properties": {
+                                "power": key,
+                                "id": el.id
+                            },
+                            "geometry": {
+                                "type": "LineString",
+                                "coordinates": el.data[key]
+                            }
+                        })
+                    })
+                    //                    console.log(isolines)
+                })
+
+                let featuresOfIsolines = {
+                    "type": "FeatureCollection",
+                    "features": isolines
+                }
+
+                const epicent = turf.polygon([
+                    [
+                        [
+                            31.373985216265538,
+                            20.720896730190887
+                        ],
+                        [
+                            31.373985216265538,
+                            19.87615772411121
+                        ],
+                        [
+                            33.22936171841803,
+                            19.87615772411121
+                        ],
+                        [
+                            33.22936171841803,
+                            20.720896730190887
+                        ],
+                        [
+                            31.373985216265538,
+                            20.720896730190887
+                        ]
+                    ]
+                ])
+
+                //                console.log(featuresOfIsolines)
+
+                map.on("load", () => {
+
+                    map.addSource('example', {
+                        "type": "geojson",
+                        "data": "forexample.geojson"
+                    })
+
+                    map.addSource('example-points-data', {
+                        "type": "geojson",
+                        "data": "forexamplepoints.geojson"
+                    })
+
+                    map.addLayer({
+                        'id': 'example-points-data-circles',
+                        'type': 'circle',
+                        'source': 'example-points-data',
+                        'layout': {
+
+                        },
+                        'paint': {
+                            'circle-radius': 5,
+                            'circle-color': 'rgba(55,148,179,1)',
+                        }
+                    })
+
+                    map.addLayer({
+                        'id': 'example-epicentr-fill',
+                        'type': 'fill',
+                        'source': {
+                            type: 'geojson',
+                            data: epicent
+                        },
+                        'paint': {
+                            'fill-color': '#FF0000', // blue color fill
+                            'fill-opacity': 0.3,
+                            //                            'fill-outline-color': '#0080ff'
+                        }
+                    })
+
+                    map.addLayer({
+                        'id': 'example-epicentr-line',
+                        'type': 'line',
+                        'source': {
+                            type: 'geojson',
+                            data: epicent
+                        },
+                        'layout': {
+                            'line-join': 'round',
+                            'line-cap': 'round'
+                        },
+                        'paint': {
+                            'line-color': "#FF0000",
+                            'line-width': 12,
+                            'line-opacity': 0.3,
+                            //                            'line-blur': 20
+                        }
+                    })
+
+                    map.addLayer({
+
+                            'id': 'example-lines',
+                            'type': 'line',
+                            'source': 'example',
+                            //                    'source-layer': 'ipkon-ts',
+                            'layout': {
+                                'line-join': 'round',
+                                'line-cap': 'round'
+                            },
+                            'paint': {
+                                'line-color': [
+                                    'interpolate',
+                                    ['linear'],
+                                    ['get', 'power'],
+                                    1,
+                                    'rgba(33,102,172,0)',
+                                    10,
+                                    'rgb(103,169,207)',
+                                    20,
+                                    'rgb(209,229,240)',
+                                    30,
+                                    'rgb(253,219,199)',
+                                    40,
+                                    'rgb(239,138,98)',
+                                    50,
+                                    'rgb(178,24,43)'
+                                ],
+                                'line-width': 5
+                            }
+                        },
+                        'road-label-simple' // Add layer below labels
+                    );
+
+
+                    map.addLayer({
+                        id: 'example-label',
+                        type: 'symbol',
+                        source: 'example',
+                        //                        filter: ['has', 'point_count'],
+                        layout: {
+                            'text-field': '{power}',
+                            'text-size': 12,
+                            'text-font': ['Montserrat Regular'],
+                            "symbol-placement": "line-center"
+
+                            //                            'text-offset': [10, 0.5]
+                            //                             'placement': "center"
+                            //                            'text-offset': [
+                            //                                'step',
+                            //                                ['get', 'point_count'],
+                            //                                ['literal', [1, 0.75]],
+                            //                                5,
+                            //                                ['literal', [1.25, 1]],
+                            //                                10,
+                            //                                ['literal', [1.5, 1.25]]
+                            //                            ],
+                        },
+                        paint: {
+                            'text-color': '#2D73E8',
+                        }
+                    })
+
+
+                    document.getElementById('zoomto').addEventListener('click', () => {
+                        // Geographic coordinates of the LineString
+                        //                        const coordinates = geojson.features[0].geometry.coordinates;
+
+                        let zoomBounds = turf.bbox(isoliness)
+                        console.log(zoomBounds)
+
+                        // Create a 'LngLatBounds' with both corners at the first coordinate.
+                        //                        const bounds = new mapboxgl.LngLatBounds(
+                        //                            coordinates[0],
+                        //                            coordinates[0]
+                        //                        );
+
+                        // Extend the 'LngLatBounds' to include every coordinate in the bounds result.
+                        //                        for (const coord of coordinates) {
+                        //                            bounds.extend(coord);
+                        //                        }
+
+                        map.fitBounds(zoomBounds, {
+                            padding: 20
+                        });
+                        
+//                        map.setZoom(map.getZoom() - 1)
+                    });
+                })
+
+
+
+
+            });
+
+
+
+
+        //        map.on('load', () => {
+        //            map.addSource('mapbox-terrain', {
+        //                type: 'geojson',
+        //                // Use any Mapbox-hosted tileset using its tileset id.
+        //                // Learn more about where to find a tileset id:
+        //                // https://docs.mapbox.com/help/glossary/tileset-id/
+        //                data: './lines.geojson'
+        //            });
+        //
+        //            // create a grid of points with random z-values in their properties
+        //            var extent = [0, 3, 20, 50];
+        //            var cellWidth = 100;
+        //            var pointGrid = turf.pointGrid(extent, cellWidth, {
+        //                units: 'miles'
+        //            });
+        //
+        //            for (var i = 0; i < pointGrid.features.length; i++) {
+        //                pointGrid.features[i].properties.temperature = Math.random() * 10;
+        //            }
+        //            var breaks = [5, 7, 8, 9, 10];
+        //
+        //            var lines = turf.isolines(pointGrid, breaks, {
+        //                zProperty: 'temperature'
+        //            })
+        //
+        //            console.log(lines)
+        //
+        //            let features = []
+        //
+        //            lines.features.forEach(multiLine => {
+        //                let coordinates = []
+        //
+        //                multiLine.geometry.coordinates.forEach(line => {
+        //                    coordinates.push(turf.bezierSpline(turf.lineString(line)).geometry.coordinates);
+        //                    //                    console.log(turf.bezierSpline(turf.lineString(line)))
+        //                    //                    console.log(line)
+        //                    //                    line = turf.bezierSpline(turf.lineString(line))
+        //                })
+        //
+        //                let geometry = {
+        //                    "coordinates": coordinates,
+        //                    "type": "MultiLineString"
+        //                }
+        //
+        //                let element = {
+        //                    "type": "Feature",
+        //                    "properties": {
+        //                        "temperature": multiLine.properties.temperature
+        //                    },
+        //                    "geometry": geometry
+        //                }
+        //
+        //                features.push(element)
+        //            })
+        //
+        //            let curveLines = {
+        //                "type": "FeatureCollection",
+        //                "features": features
+        //            }
+        //
+        //            console.log(curveLines)
+        //
+        //            //            map.addLayer({
+        //            //                    'id': 'terrain-data',
+        //            //                    'type': 'line',
+        //            //                    'source': {
+        //            //                        "type": "geojson",
+        //            //                        "data": featuresOfIsolines
+        //            //                    },
+        //            //                    //                    'source-layer': 'ipkon-ts',
+        //            //                    'layout': {
+        //            //                        'line-join': 'round',
+        //            //                        'line-cap': 'round'
+        //            //                    },
+        //            //                    'paint': {
+        //            //                        'line-color': '#ff69b4',
+        //            //                        'line-width': 5
+        //            //                    }
+        //            //                },
+        //            //                'road-label-simple' // Add layer below labels
+        //            //            );
+        //        });
+
+    </script>
+
+</body>
+
+</html>

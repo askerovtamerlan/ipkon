@@ -1,0 +1,60 @@
+{
+    "sensors": [
+        {
+            "id": 8,
+            "name": "170069",
+            "status": "on",
+            "type": "seismo",
+            "lon": 55.520603293793556,
+            "lat": 86.0950510210773,
+            "alt": 191.0,
+            "params": {
+                "level StaLta": 1.6
+            }
+        },
+        {
+            "id": 9,
+            "name": "170071",
+            "status": "on",
+            "type": "seismo",
+            "lon": 55.53342029390098,
+            "lat": 86.0960130190992,
+            "alt": 179.0,
+            "params": {
+                "level StaLta": 1.6
+            }
+        },
+        {
+            "id": 10,
+            "name": "170078",
+            "status": "on",
+            "type": "seismo",
+            "lon": 55.54576029403322,
+            "lat": 86.099243014576,
+            "alt": 186.0,
+            "params": {
+                "level StaLta": 7.0
+            }
+        },
+        {
+            "id": 11,
+            "name": "AGZ2000",
+            "status": "off",
+            "type": "air",
+            "lon": 55.54538939302743,
+            "lat": 86.09900101487665,
+            "alt": 191.0,
+            "params": {}
+        },
+        {
+            "id": 12,
+            "name": "Trassir TR-D6254IR15",
+            "status": "off",
+            "type": "video",
+            "lon": 55.54533329402739,
+            "lat": 86.09903101484646,
+            "alt": 191.0,
+            "params": {}
+        }
+    ]
+}

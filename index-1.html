@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>ipkon's map</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+
+
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.css' rel='stylesheet' />
+
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.js'></script>
+    <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+    </style>
+
+</head>
+
+<body>
+    <div id='map' style='width: 1400px; height: 1300px;'></div>
+
+
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoiaG9va2FobG9jYXRvciIsImEiOiI5WnJEQTBBIn0.DrAlI7fhFaYr2RcrWWocgw';
+        const map = new mapboxgl.Map({
+            container: 'map',
+            // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
+            style: 'mapbox://styles/mapbox/light-v11',
+            zoom: 3,
+            center: [-122.447303, 37.753574]
+        });
+        
+        
+        
+
+        map.on('load', () => {
+            map.addSource('mapbox-terrain', {
+                type: 'geojson',
+                // Use any Mapbox-hosted tileset using its tileset id.
+                // Learn more about where to find a tileset id:
+                // https://docs.mapbox.com/help/glossary/tileset-id/
+                data: './lines.geojson'
+            });
+
+            // create a grid of points with random z-values in their properties
+            var extent = [0, 3, 20, 50];
+            var cellWidth = 100;
+            var pointGrid = turf.pointGrid(extent, cellWidth, {
+                units: 'miles'
+            });
+
+            for (var i = 0; i < pointGrid.features.length; i++) {
+                pointGrid.features[i].properties.temperature = Math.random() * 10;
+            }
+            var breaks = [ 5, 7, 8, 9, 10];
+
+            var lines = turf.isolines(pointGrid, breaks, {
+                zProperty: 'temperature'
+            })
+
+            console.log(lines)
+
+            let features = []
+
+            lines.features.forEach(multiLine => {
+                let coordinates = []
+
+                multiLine.geometry.coordinates.forEach(line => {
+                    coordinates.push(turf.bezierSpline(turf.lineString(line)).geometry.coordinates);
+//                    console.log(turf.bezierSpline(turf.lineString(line)))
+//                    console.log(line)
+//                    line = turf.bezierSpline(turf.lineString(line))
+                })
+
+                let geometry = {
+                    "coordinates": coordinates,
+                    "type": "MultiLineString"
+                }
+
+                let element = {
+                    "type": "Feature",
+                    "properties": {
+                        "temperature": multiLine.properties.temperature
+                    },
+                    "geometry": geometry
+                }
+
+                features.push(element)
+            })
+
+            let curveLines = {
+                "type": "FeatureCollection",
+                "features": features
+            }
+
+            console.log(curveLines)
+
+            map.addLayer({
+                    'id': 'terrain-data',
+                    'type': 'line',
+                    'source': {
+                        "type": "geojson",
+                        "data": curveLines
+                    },
+                    //                    'source-layer': 'ipkon-ts',
+                    'layout': {
+                        'line-join': 'round',
+                        'line-cap': 'round'
+                    },
+                    'paint': {
+                        'line-color': '#ff69b4',
+                        'line-width': 5
+                    }
+                },
+                'road-label-simple' // Add layer below labels
+            );
+        });
+
+    </script>
+
+</body>
+
+</html>
