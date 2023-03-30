@@ -26,6 +26,39 @@
             width: 100%;
         }
 
+        /*        LEFT MENU */
+
+        .map-overlay {
+            position: absolute;
+            width: 25%;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+            background: linear-gradient(to bottom, #efefef 60%, transparent);
+            max-height: 100%;
+            overflow: hidden;
+        }
+
+        .map-overlay .listing {
+            overflow: auto;
+            max-height: 100%;
+        }
+
+        .map-overlay .listing>* {
+            display: block;
+            padding: 5px 10px;
+            margin: 0;
+        }
+
+        .map-overlay .listing p {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            color: #404;
+            text-decoration: none;
+        }
+
+        /*        ZOOM BUTTON */
+
         .btn-control {
             font: bold 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
             background-color: #3386c0;
@@ -55,6 +88,12 @@
     <div id='map' style='width: 1400px; height: 1300px;'></div>
     <button id="zoomto" class="btn-control">Zoom to bounds</button>
 
+    <div class="map-overlay">
+        <div id="feature-listing" class="listing">
+
+        </div>
+    </div>
+
 
 
     <script>
@@ -76,12 +115,12 @@
             container: 'map',
             // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
             style: 'mapbox://styles/mapbox/light-v11',
-            zoom: 4,
+            zoom: 6,
             center: [31.373985216265538,
                 20.720896730190887
             ],
-            projection: 'mercator',
-            maxBounds: bounds
+            projection: 'mercator'
+            //            maxBounds: bounds
         });
 
 
@@ -93,50 +132,51 @@
 
         let url = ['./forexample.geojson']
 
-        let isoliness = []
+        let ides = []
         //        let featuresOfIsolines = {}
 
-        async function exampleFetch() {
-            const response = await fetch('./forexample.geojson')
-            const json = await response.json()
-            return json
-        }
-
-        exampleFetch().then(res => {
-            console.log(res)
-            isoliness = {
-                "type": "FeatureCollection",
-                "features": res.features.map(line => turf.bezierSpline(line, {
-                    properties: {
-                        power: line.properties.power
-                    }
-                }))
-            }
-
-            console.log(isoliness)
-
-            map.addLayer({
-                'id': 'isoliness',
-                'source': {
-                    "type": "geojson",
-                    "data": isoliness,
-                },
-                "type": "line",
-                "paint": {
-                    "line-color": "#FF0000",
-                    "line-width": 3,
-                    'line-opacity': 0.25
-                }
-
-            })
-        })
+        //        async function exampleFetch() {
+        //            const response = await fetch('./forexample.geojson')
+        //            const json = await response.json()
+        //            return json
+        //        }
+        //
+        //        exampleFetch().then(res => {
+        //            //            console.log(res)
+        //
+        //            isoliness = {
+        //                "type": "FeatureCollection",
+        //                "features": res.features.map(line => turf.bezierSpline(line, {
+        //                    properties: {
+        //                        power: line.properties.power
+        //                    }
+        //                }))
+        //            }
+        //
+        //            //            console.log(isoliness)
+        //
+        //            map.addLayer({
+        //                'id': 'isoliness',
+        //                'source': {
+        //                    "type": "geojson",
+        //                    "data": isoliness,
+        //                },
+        //                "type": "line",
+        //                "paint": {
+        //                    "line-color": "#FF0000",
+        //                    "line-width": 3,
+        //                    'line-opacity': 0.25
+        //                }
+        //
+        //            })
+        //        })
 
 
 
 
         //        console.log(isoliness)
 
-        fetch('isolines.json')
+        fetch('isolines_new.json')
             .then((response) => {
                 return response.json();
             })
@@ -145,25 +185,30 @@
                 data.isolines.forEach((el, index) => {
                     Object.keys(el.data).forEach(key => {
                         //                        console.log(key)
+                        ides.push(el.seismoevent_id)
+
                         isolines.push({
                             "type": "Feature",
                             "properties": {
-                                "power": key,
-                                "id": el.id
+                                "power": +key,
+                                "id": el.seismoevent_id
                             },
                             "geometry": {
                                 "type": "LineString",
-                                "coordinates": el.data[key]
+                                "coordinates": el.data[key].map(coordinates => coordinates.reverse())
                             }
                         })
                     })
-                    //                    console.log(isolines)
                 })
 
                 let featuresOfIsolines = {
                     "type": "FeatureCollection",
                     "features": isolines
                 }
+
+                console.log('hey')
+                console.log(featuresOfIsolines)
+
 
                 const epicent = turf.polygon([
                     [
@@ -190,13 +235,17 @@
                     ]
                 ])
 
+                const toggleableIsolainsId = [...new Set(ides)]
+                console.log(toggleableIsolainsId)
+
+
                 //                console.log(featuresOfIsolines)
 
                 map.on("load", () => {
 
                     map.addSource('example', {
                         "type": "geojson",
-                        "data": "forexample.geojson"
+                        "data": featuresOfIsolines
                     })
 
                     map.addSource('example-points-data', {
@@ -265,17 +314,27 @@
                                     'interpolate',
                                     ['linear'],
                                     ['get', 'power'],
-                                    1,
-                                    'rgba(33,102,172,0)',
-                                    10,
-                                    'rgb(103,169,207)',
-                                    20,
+//                                    0,
+//                                    'rgb(103,139,207)',
+//                                                                        0.05,
+//                                                                        'rgb(103,139,197)',
+//                                                                        0.2,
+//                                                                        'rgb(103,139,187)',
+//                                                                        0.5,
+//                                                                        'rgb(103,139,177)',
+//                                                                        0.8,
+//                                                                        'rgb(103,139,167)',
+//                                                                        1,
+//                                                                        'rgb(103,139,157)',
+//                                    20,
+//                                    'rgb(103,169,207)',
+                                    0,
                                     'rgb(209,229,240)',
-                                    30,
+                                    33,
                                     'rgb(253,219,199)',
-                                    40,
+                                    66,
                                     'rgb(239,138,98)',
-                                    50,
+                                    100,
                                     'rgb(178,24,43)'
                                 ],
                                 'line-width': 5
@@ -313,12 +372,26 @@
                         }
                     })
 
+                    const listContainer = document.getElementById('feature-listing')
+
+                    for (const id of toggleableIsolainsId) {
+                        const explosion = document.createElement('p')
+                        explosion.innerHTML = `Explosion# ${id}`
+
+                        explosion.onclick = function(e) {
+                            map.setFilter('example-lines', ['==', ['get', 'id'], id])
+                            map.setFilter('example-label', ['==', ['get', 'id'], id])
+                        }
+
+                        listContainer.appendChild(explosion)
+                    }
+
 
                     document.getElementById('zoomto').addEventListener('click', () => {
                         // Geographic coordinates of the LineString
                         //                        const coordinates = geojson.features[0].geometry.coordinates;
 
-                        let zoomBounds = turf.bbox(isoliness)
+                        let zoomBounds = turf.bbox(featuresOfIsolines)
                         console.log(zoomBounds)
 
                         // Create a 'LngLatBounds' with both corners at the first coordinate.
@@ -335,8 +408,8 @@
                         map.fitBounds(zoomBounds, {
                             padding: 20
                         });
-                        
-//                        map.setZoom(map.getZoom() - 1)
+
+                        //                        map.setZoom(map.getZoom() - 1)
                     });
                 })
 
