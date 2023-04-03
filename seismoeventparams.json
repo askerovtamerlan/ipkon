@@ -1,0 +1,127 @@
+﻿{
+    "sensors": [
+        {
+            "id": 1,
+            "created": "2023-03-23T13:44:53.248224",
+            "name": "Блок №29",
+            "block_contuor": [
+                [
+                    55.56604457193041,
+                    86.07591567150264
+                ],
+                [
+                    55.56788560825078,
+                    86.07587246057159
+                ],
+                [
+                    55.56788082870335,
+                    86.07523851085467
+                ],
+                [
+                    55.56603979271038,
+                    86.07528175142659
+                ]
+            ],
+            "type": "Blast",
+            "volume_blasted_rock_mass": 219000,
+            "specific_consumption_explosives": 0.808,
+            "deceleration_interval": "42; 67; 109; 1000",
+            "wells_diameter": "200; 229",
+            "wells_grid": "6.2 5.5 5.0 4.0 3.0",
+            "water_height": 3.0,
+            "explosive_type": "РПГМ-100; Нитронит П марка С-60-0,8",
+            "wells_count": 504,
+            "total_mass_explosives_block": 176915.2,
+            "max_mass_in_well": 461.5,
+            "blasting_method": "ИСКРА-С; ИСКРА-П; ИСКРА-СТАРТ-В; УПР-1А",
+            "rocks_type": "песчаник",
+            "rock_hardness": 10.5,
+            "distance2protected_object": 2519.0,
+            "zaboika": "буровая мелочь",
+            "other_params": {},
+            "seismoevent": 1
+        },
+        {
+            "id": 2,
+            "created": "2023-03-23T14:11:26.415348",
+            "name": "03-03-23-36-2",
+            "block_contuor": [
+                [
+                    55.55987412867021,
+                    86.10379498764338
+                ],
+                [
+                    55.561580469961456,
+                    86.1037561561254
+                ],
+                [
+                    55.561570616650386,
+                    86.10240921851394
+                ],
+                [
+                    55.559864275984644,
+                    86.10244810838888
+                ]
+            ],
+            "type": "Blast",
+            "volume_blasted_rock_mass": null,
+            "specific_consumption_explosives": null,
+            "deceleration_interval": null,
+            "wells_diameter": null,
+            "wells_grid": null,
+            "water_height": null,
+            "explosive_type": null,
+            "wells_count": null,
+            "total_mass_explosives_block": null,
+            "max_mass_in_well": null,
+            "blasting_method": null,
+            "rocks_type": null,
+            "rock_hardness": null,
+            "distance2protected_object": null,
+            "zaboika": null,
+            "other_params": null,
+            "seismoevent": 2
+        },
+        {
+            "id": 3,
+            "created": "2023-03-23T15:14:59.086421",
+            "name": "14-03-23-152_16:40",
+            "block_contuor": [
+                [
+                    55.56604457193041,
+                    86.07591567150264
+                ],
+                [
+                    55.56788560825078,
+                    86.07587246057159
+                ],
+                [
+                    55.56788082870335,
+                    86.07523851085467
+                ],
+                [
+                    55.56603979271038,
+                    86.07528175142659
+                ]
+            ],
+            "type": "Blast",
+            "volume_blasted_rock_mass": null,
+            "specific_consumption_explosives": null,
+            "deceleration_interval": null,
+            "wells_diameter": null,
+            "wells_grid": null,
+            "water_height": null,
+            "explosive_type": null,
+            "wells_count": null,
+            "total_mass_explosives_block": null,
+            "max_mass_in_well": null,
+            "blasting_method": null,
+            "rocks_type": null,
+            "rock_hardness": null,
+            "distance2protected_object": null,
+            "zaboika": null,
+            "other_params": null,
+            "seismoevent": 4
+        }
+    ]
+}
