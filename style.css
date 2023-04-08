@@ -1,7 +1,21 @@
+@font-face {
+    font-family: 'DIN pro';
+    src: url('./fonts/dinpro.otf');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'DIN pro';
+    src: url('./fonts/dinpro_bold.otf');
+    font-weight: 500;
+    font-style: normal;
+}
+
 body {
     margin: 0;
     padding: 0;
-        overflow: hidden;
+    overflow: hidden;
 }
 
 #map {
@@ -20,10 +34,13 @@ body {
     top: 0;
     bottom: 0;
     left: 0;
-    font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    font: 12px/20px 'DIN Pro', Arial, Helvetica, sans-serif;
     background: linear-gradient(to bottom, rgb(220, 232, 244) 30%, 100%, transparent 130%);
     max-height: 100%;
-        overflow: hidden;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .map-overlay .listing {
@@ -39,19 +56,63 @@ body {
 
 .map-overlay .listing div.explosion {
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    color: #fff;
+    color: rgba(0,0,0,0.8);
     text-decoration: none;
 }
 
 .map-overlay .listing div.explosion:not(.explosion-active):hover {
-    background-color: rgb(94, 147, 84);
+    background-color: rgba(12, 230, 51, 0.6);
 }
 
 .map-overlay .listing div.explosion-active {
-    background-color: aquamarine;
+    background-color: rgba(48, 218, 65, 0.5);
+    box-shadow: 10px black;
 }
 
+/* MENU INFO*/
 
+.info-listing {
+    /*    align-self: flex-end;
+    */
+    align-content: flex-end;
+    font-size: 10px;
+    font-weight: 500;
+    color: rgba(0,0,0,0.8);
+}
+
+ul.info-listing {
+    list-style: none;
+    padding-left: 25px;
+    margin-bottom: 50px;
+}
+
+ul.info-listing li {
+    margin-bottom: 15px;
+    display: flex;
+    max-width: 80%;
+    
+}
+
+ul.info-listing span {
+    line-height: 15px;
+}
+
+ul.info-listing li:nth-child(2) img {
+    width: 27px;
+/*    border: 1px solid rgba(0, 0, 0, 0.1);*/
+}
+
+ul.info-listing li:nth-child(3) img {
+    height: 17px;
+    width: 80%;
+}
+
+img {
+    width: 27px;
+    height: 27px;
+    margin-right: 20px;
+/*    aspect-ratio: 1;*/
+}
 
 
 
@@ -62,14 +123,123 @@ body {
     font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 
-.mapboxgl-popup ul.explosion_info {
-    font-size: 10px;
-    line-height: 15px;
-    /*            list-style: none;*/
+/*SENSOR POPUP STYLE*/
+
+.mapboxgl-popup.mapboxgl-popup_sensor div.mapboxgl-popup-content {
+    color: black;
+    font-family: "DIN Pro";
+    line-height: 18px;
+    border: 2px solid rgba(214, 60, 54, 0.7);
+    border-radius: 5px;
+    min-width: 140px;
+}
+
+.mapboxgl-popup_sensor ul.sensor_info {
+    list-style: none;
     margin: 0;
     padding: 0;
-    /*    display:none;*/
 }
+
+.mapboxgl-popup_sensor ul li:first-child {
+    font-weight: 500;
+    color: black;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+
+.mapboxgl-popup_sensor ul li {
+    color: rgb(214, 60, 54);
+    text-transform: lowercase;
+    display: flex;
+    justify-content: space-between;
+}
+
+.mapboxgl-popup_sensor p {
+    margin: 0;
+    display: inline-block;
+    text-decoration: underline;
+    font-size: 12px;
+
+}
+
+.mapboxgl-popup_sensor ul li p:after {
+    content: ': ';
+}
+
+.mapboxgl-popup_sensor ul li span:after {
+    content: ',';
+}
+
+.mapboxgl-popup_sensor ul li span:last-child:after {
+    /*    content: '';*/
+}
+
+.mapboxgl-popup_sensor ul li span {
+    color: black;
+    text-decoration: none !important;
+    display: inline-block;
+    text-transform: uppercase;
+
+}
+
+/* BLOCK POPUP STYLE*/
+
+.mapboxgl-popup.mapboxgl-popup_block div.mapboxgl-popup-content {
+    color: black;
+    font-family: "DIN Pro";
+    line-height: 18px;
+    border: 2px solid #EEE63E;
+    border-radius: 5px;
+    /*    background: linear-gradient(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.08)), url(./pattern-yellow.png);*/
+    background-image: url(./pattern-yellow-op.png);
+}
+
+.mapboxgl-popup_block ul.explosion_info {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.mapboxgl-popup_block ul li:first-child {
+    font-weight: 500;
+    color: black;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.mapboxgl-popup_block ul li:nth-child(2) {
+    color: darkgrey;
+    text-decoration: none;
+    text-transform: lowercase;
+}
+
+
+.mapboxgl-popup_block ul li {
+    color: rgb(234, 60, 54);
+    text-decoration: underline;
+    text-transform: lowercase;
+}
+
+.mapboxgl-popup_block ul li span:before {
+    content: ': ';
+}
+
+.mapboxgl-popup_block ul li span:after {
+    content: ',';
+}
+
+.mapboxgl-popup_block ul li span:last-child:after {
+    /*    content: '';*/
+}
+
+.mapboxgl-popup_block ul li span {
+    color: black;
+    text-decoration: none !important;
+    display: inline-block;
+}
+
+
 /*        ZOOM BUTTON */
 
 /*

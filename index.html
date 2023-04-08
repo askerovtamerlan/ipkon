@@ -26,6 +26,16 @@
         <div id="feature-listing" class="listing">
             <!--            <p></p>-->
         </div>
+
+        <div id="decompose-map" class="info">
+            <ul class="info-listing">
+                <li><img src="./sensor.png"><span>Сенсор для снятия показаний</span></li>
+                <li><img src="./pattern-yellow.png"><span>Площадь взрываемого горного массива</span></li>
+                <li><img src="./gradient.png"></li>
+                <li><span>Диапозон изменения величины отображаемой изолиниями</span></li>
+
+            </ul>
+        </div>
     </div>
 
 
@@ -48,7 +58,7 @@
         const map = new mapboxgl.Map({
             container: 'map',
             // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
-            style: 'mapbox://styles/mapbox/satellite-streets-v12',
+            style: "mapbox://styles/hookahlocator/clg82vae6008501mpb46y0kwc",
             zoom: 11,
             center: [
                 86.07591567150264,
@@ -60,8 +70,14 @@
             //            maxBounds: bounds
         });
 
-        const popup = new mapboxgl.Popup({
-            closeOnClick: true
+        const popupBlock = new mapboxgl.Popup({
+            closeOnClick: true,
+            className: 'mapboxgl-popup_block'
+        })
+
+        const popupSensor = new mapboxgl.Popup({
+            closeOnClick: true,
+            className: 'mapboxgl-popup_sensor'
         })
 
         //        let featuresOfIsolines = {}
@@ -151,6 +167,10 @@
             data[2].sensors.forEach((el) => {
 
                 ides.push(el.id)
+
+                let coordinates = el.block_contuor.map(coordinates => coordinates.reverse())
+                //                coordinates.push(el.block_contuor[0].reverse())
+                //                console.log(el.block_contuor[0].reverse())
 
 
                 blocks.push({
@@ -246,7 +266,7 @@
                     },
                     "geometry": {
                         "type": "Polygon",
-                        "coordinates": [el.block_contuor.map(coordinates => coordinates.reverse())]
+                        "coordinates": [coordinates]
                     }
                 })
             })
@@ -542,7 +562,7 @@
                                 ['linear'],
                                 ['get', 'power'],
                                 0,
-                                'rgb(205, 208, 255)',
+                                'rgb(220, 232, 244)',
                                 //                                20,
                                 //                                
                                 //                                40,
@@ -615,7 +635,7 @@
                     //                    console.log(expData.properties.info)
 
                     const textExplosion = `<div class="explosion_label">
-                    Explosion# ${id} </br> <span> Объем взрываемого горного массива: ${expData.properties.name} </span></div>`
+                    Explosion# ${id} </br> <span> Имя и дата: ${expData.properties.name} </span> ${expData.properties.date}</div>`
 
 
 
@@ -730,6 +750,8 @@
 
                     let infoExplosion = `<ul class="explosion_info">`
 
+                    infoExplosion += `<li>${feature.properties.name}</li><li>${feature.properties.date}</li>>`
+
                     const {
                         properties: {
                             info: data
@@ -751,31 +773,39 @@
 
                     infoExplosion += `</ul>`
 
-                    popup.remove()
+                    popupSensor.remove()
+                    popupBlock.remove()
 
-                    popup
+
+
+                    popupBlock
                         .setLngLat(turf.center(feature).geometry.coordinates)
                         .setHTML(infoExplosion)
                         .addTo(map);
+
+
                 }
 
                 function createPopupSensor(feature) {
 
                     let infoSensor = `
-                       <ul>
+                       <ul class="sensor_info">
                           <li>Сенсор №${feature.properties.id}</li>
-                          <li>Тип сенсора: <span>${feature.properties.type}</span></li>
-                          <li>Состояние:<span>${"Включен" ? feature.properties.status == "on" : "Выключен"}</span></li>
-                          <li>Alt: <span>${feature.properties.alt}</span></li>
-                          <li>Level Stalta<span>${feature.properties.level_stalta}</span></li>
+<li><p>Тип сенсора</p> <span>${feature.properties.type}</span></li>
+                          <li><p>Состояние</p><span>${ feature.properties.status == "on" ? "Включен" : "Выключен"}</span></li>
+                          <li><p>Alt</p> <span>${feature.properties.alt}</span></li>
+                          <li><p>Level Stalta</p><span>${feature.properties.level_stalta ? feature.properties.level_stalta : '...'}</span></li>
                        </ul>`
 
-                    popup.remove()
+                    popupSensor.remove()
+                    popupBlock.remove()
 
-                    popup
+                    popupSensor
                         .setLngLat(feature.geometry.coordinates)
                         .setHTML(infoSensor)
                         .addTo(map)
+
+
                 }
 
                 map.on('click', 'example-points-data-circles', (e) => {
