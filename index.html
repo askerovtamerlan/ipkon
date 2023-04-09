@@ -41,6 +41,11 @@
 
 
     <script>
+        // Isolians parameters, at default sharpness is 0.85, and resolution 10 000
+        
+        let SHARPNESS = 0.5
+        let RESOLUTION = 5000
+        
         mapboxgl.accessToken = 'pk.eyJ1IjoiaG9va2FobG9jYXRvciIsImEiOiI5WnJEQTBBIn0.DrAlI7fhFaYr2RcrWWocgw';
 
         const bounds = [
@@ -94,6 +99,9 @@
         }, {
             "name": "blocks",
             "url": './seismoeventparams.json'
+        }, {
+            "name": "seismoevents",
+            "url": './seismoevents.json'
         }]
 
         let fetchedData = []
@@ -116,21 +124,21 @@
 
             data[2].seismoeventparams.forEach((el) => {
 
-                ides.push(el.id)
+                ides.push(el.seismoevent)
 
                 let coordinates = el.block_contuor.map(coordinates => coordinates.reverse())
                 //                coordinates.push(el.block_contuor[0].reverse())
-
-
+                const seismoevent = data[3].seismoevents.find(event => event.id == el.seismoevent)
 
                 blocks.push({
                     "type": "Feature",
                     "properties": {
-                        "id": el.id,
+                        "id": el.seismoevent,
                         "name": el.name,
-                        "date": el.created,
-                        "info": {
-
+                        "created": el.created,
+                        "time_actual": el.time_actual,
+                        "time_scheduled": el.time_scheduled,
+                        "info": { 
                             "volume_blasted_rock_mass": {
                                 "name": "Объем взрываемого горного массива",
                                 "value": el.volume_blasted_rock_mass,
@@ -230,7 +238,7 @@
                         "status": el.status,
                         "type": el.type,
                         "alt": el.alt,
-                        "level_stalta": el.params.level_stalta
+                        "level StaLta": el.params.level_stalta
                     },
                     "geometry": {
                         "type": "Point",
@@ -256,6 +264,13 @@
                 Object.keys(el.data).forEach(key => {
                     //                        console.log(key)
 
+                    const line = turf.lineString(el.data[key].map(coordinates => coordinates.reverse()))
+
+                    const curvedLine = turf.bezierSpline(line, {
+                        "sharpness": SHARPNESS,
+                        "resolution": RESOLUTION
+                    })
+
                     isolines.push({
                         "type": "Feature",
                         "properties": {
@@ -264,7 +279,7 @@
                         },
                         "geometry": {
                             "type": "LineString",
-                            "coordinates": el.data[key].map(coordinates => coordinates.reverse())
+                            "coordinates": curvedLine.geometry.coordinates
                         }
                     })
                 })
@@ -623,17 +638,22 @@
 
                         console.log('op')
 
-                        const coordinatesId = featuresOfIsolines.features.filter(line => line.properties.id == id).sort((a, b) =>
-                            a.properties.power - b.properties.power
-                        )[0].geometry.coordinates
+                        //                        const coordinatesId = featuresOfIsolines.features.filter(line => line.properties.id == id).sort((a, b) =>
+                        //                            a.properties.power - b.properties.power
+                        //                        )[0].geometry.coordinates
 
-                        const isoliansId = featuresOfIsolines.features.filter(line => line.properties.id == id)
+                        //                        console.log(featuresOfIsolines)
+                        //                        console.log(id)
+                        //
+                        //
+                        //
+                        //                        console.log(isoliansId)
 
                         //                            [0].geometry.coordinates
 
-                        console.log('foo')
+                        //                        console.log('foo')
 
-                        console.log(coordinatesId)
+                        //                        console.log(coordinatesId)
 
 
 
@@ -646,19 +666,30 @@
                         //                                console.log('ee')
                         //                            }
 
-                        let bboxIsolians = turf.bbox({
-                            features: isoliansId,
-                            type: "FeatureCollection"
-                        })
+                        const isoliansId = featuresOfIsolines.features.filter(line => line.properties.id == id)
 
-                        let centerOfIsolians = turf.center({
-                            features: isoliansId,
-                            type: "FeatureCollection"
-                        })
+                        if (isoliansId.length) {
+                            let bboxIsolians = turf.bbox({
+                                features: isoliansId,
+                                type: "FeatureCollection"
+                            })
 
-                        console.log(centerOfIsolians)
-                        console.log(centerOfIsolians.geometry.coordinates[0])
-                        console.log(centerOfIsolians.geometry.coordinates[1])
+                            map.fitBounds(bboxIsolians, {
+                                padding: 20
+                            });
+                        }
+
+
+
+
+                        //                        console.log(centerOfIsolians)
+                        //                        console.log(centerOfIsolians.geometry.coordinates[0])
+                        //                        console.log(centerOfIsolians.geometry.coordinates[1])
+
+                        //                        let centerOfIsolians = turf.center({
+                        //                            features: isoliansId,
+                        //                            type: "FeatureCollection"
+                        //                        })
 
                         //                        let sv = new mapboxgl.LngLat(centerOfIsolians.geometry.coordinates)
                         //                        let ne = new mapboxgl.LngLat(centerOfIsolians.geometry.coordinates)
@@ -669,11 +700,11 @@
 
                         console.log('vchuuux')
                         //                        console.log(bounds)
-                        console.log(coordinatesId)
+                        //                        console.log(coordinatesId)
 
-                        for (const coord of coordinatesId) {
-                            //                            bounds.extend(coord)
-                        }
+                        //                        for (const coord of coordinatesId) {
+                        //                            bounds.extend(coord)
+                        //                        }
 
                         //                        let zoomBounds = turf.bbox(coordinatesId)
                         //                            let zoomBounds = turf.bbox({
@@ -682,9 +713,6 @@
 
                         //                        let boundsOfLayer = map.getSource('example-lines').tileBounds.bounds
 
-                        map.fitBounds(bboxIsolians, {
-                            padding: 20
-                        });
 
                         // SHOWPOPUP
                         console.log(expData)
@@ -714,8 +742,9 @@
                         objData = JSON.parse(data)
                     } else {
                         objData = data
-                        //                        console.log(objData)
                     }
+                    console.log(objData)
+
 
                     Object.keys(objData).forEach(field => {
                         infoExplosion += `<li>${objData[field].name}:<span>${objData[field].value},${objData[field].type}</span></li>`
