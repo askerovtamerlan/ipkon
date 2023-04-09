@@ -80,48 +80,6 @@
             className: 'mapboxgl-popup_sensor'
         })
 
-        //        let featuresOfIsolines = {}
-
-        //        async function exampleFetch() {
-        //            const response = await fetch('./forexample.geojson')
-        //            const json = await response.json()
-        //            return json
-        //        }
-        //
-        //        exampleFetch().then(res => {
-        //            //            console.log(res)
-        //
-        //            isoliness = {
-        //                "type": "FeatureCollection",
-        //                "features": res.features.map(line => turf.bezierSpline(line, {
-        //                    properties: {
-        //                        power: line.properties.power
-        //                    }
-        //                }))
-        //            }
-        //
-        //            //            console.log(isoliness)
-        //
-        //            map.addLayer({
-        //                'id': 'isoliness',
-        //                'source': {
-        //                    "type": "geojson",
-        //                    "data": isoliness,
-        //                },
-        //                "type": "line",
-        //                "paint": {
-        //                    "line-color": "#FF0000",
-        //                    "line-width": 3,
-        //                    'line-opacity': 0.25
-        //                }
-        //
-        //            })
-        //        })
-
-
-
-
-        //        console.log(isoliness)
 
         let isolines = []
         let sensors = []
@@ -138,8 +96,6 @@
             "url": './seismoeventparams.json'
         }]
 
-        let url = ['./forexample.geojson']
-
         let fetchedData = []
 
         let ides = []
@@ -151,12 +107,6 @@
         Promise.all(requests).then(responses =>
             Promise.all(responses.map(response =>
                 response.json()
-                //                fetchedData.push({
-                //                    "name": urls[index].name,
-                //                    "data": data
-                //                })
-                //
-                //                console.log(fetchedData)
             ))
         ).then((data) => {
             console.log(data)
@@ -170,7 +120,7 @@
 
                 let coordinates = el.block_contuor.map(coordinates => coordinates.reverse())
                 //                coordinates.push(el.block_contuor[0].reverse())
-                //                console.log(el.block_contuor[0].reverse())
+
 
 
                 blocks.push({
