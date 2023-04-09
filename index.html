@@ -87,7 +87,7 @@
 
         let urls = [{
             "name": "isolines",
-            "url": './isolines_new.json'
+            "url": './isolines.json'
         }, {
             "name": "sensors",
             "url": './sensors.json'
@@ -114,7 +114,7 @@
             console.log(fetchedData)
 
 
-            data[2].sensors.forEach((el) => {
+            data[2].seismoeventparams.forEach((el) => {
 
                 ides.push(el.id)
 
@@ -260,7 +260,7 @@
                         "type": "Feature",
                         "properties": {
                             "power": +key,
-                            "id": el.seismoevent_id
+                            "id": el.seismoevent
                         },
                         "geometry": {
                             "type": "LineString",
