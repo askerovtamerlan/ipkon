@@ -13,6 +13,7 @@
 
     <script src='https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.js'></script>
     <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment-with-locales.min.js"></script>
 
 
 
@@ -42,10 +43,13 @@
 
     <script>
         // Isolians parameters, at default sharpness is 0.85, and resolution 10 000
-        
+
         let SHARPNESS = 0.5
         let RESOLUTION = 5000
-        
+
+        moment.locale('ru')
+
+
         mapboxgl.accessToken = 'pk.eyJ1IjoiaG9va2FobG9jYXRvciIsImEiOiI5WnJEQTBBIn0.DrAlI7fhFaYr2RcrWWocgw';
 
         const bounds = [
@@ -90,18 +94,32 @@
         let sensors = []
         let blocks = []
 
+        //        let urls = [{
+        //            "name": "isolines",
+        //            "url": 'localhost8000/api/isolines'
+        //        }, {
+        //            "name": "sensors",
+        //            "url": 'localhost8000/api/sensors'
+        //        }, {
+        //            "name": "blocks",
+        //            "url": 'localhost8000/api/seismoeventsparams'
+        //        }, {
+        //            "name": "seismoevents",
+        //            "url": 'localhost8000/api/seismoevents'
+        //        }]
+
         let urls = [{
             "name": "isolines",
-            "url": 'localhost8000/api/isolines'
+            "url": './isolines.json'
         }, {
             "name": "sensors",
-            "url": 'localhost8000/api/sensors'
+            "url": './sensors.json'
         }, {
             "name": "blocks",
-            "url": 'localhost8000/api/seismoeventsparams'
+            "url": './seismoeventparams.json'
         }, {
             "name": "seismoevents",
-            "url": 'localhost8000/api/seismoevents'
+            "url": './seismoevents.json'
         }]
 
         let fetchedData = []
@@ -135,10 +153,10 @@
                     "properties": {
                         "id": el.seismoevent,
                         "name": el.name,
-                        "created": el.created,
-                        "time_actual": el.time_actual,
-                        "time_scheduled": el.time_scheduled,
-                        "info": { 
+                        "created": moment(seismoevent.created, 'YYYY-MM-DDTHH:mm:ss.SSSS'),
+                        "time_actual": seismoevent.time_actual,
+                        "time_scheduled": seismoevent.time_scheduled,
+                        "info": {
                             "volume_blasted_rock_mass": {
                                 "name": "Объем взрываемого горного массива",
                                 "value": el.volume_blasted_rock_mass,
@@ -599,8 +617,11 @@
 
                     //                    console.log(expData.properties.info)
 
+                    let date = expData.properties.created
+                    date.locale('ru')
+
                     const textExplosion = `<div class="explosion_label">
-                    Explosion# ${id} </br> <span> Имя и дата: ${expData.properties.name} </span> ${expData.properties.date}</div>`
+                    ${expData.properties.name} </br><span> Дата:  ${date.format('DD MMM YYYY HH:MM:SS.SS')} </span> </div>`
 
 
 
