@@ -23,6 +23,7 @@
     <div id='map' style='width: 1400px; height: 1300px;'></div>
     <!--    <button id="zoomto" class="btn-control">Zoom to bounds</button>-->
 
+
     <div class="map-overlay">
         <div id="feature-listing" class="listing">
             <!--            <p></p>-->
@@ -94,6 +95,11 @@
         let sensors = []
         let blocks = []
 
+        let places = []
+
+        let contuors = []
+
+
         //        let urls = [{
         //            "name": "isolines",
         //            "url": 'localhost8000/api/isolines'
@@ -120,9 +126,12 @@
         }, {
             "name": "seismoevents",
             "url": './seismoevents.json'
+        }, {
+            "name": "places",
+            "url": './places.json'
         }]
 
-        let fetchedData = []
+        //        let fetchedData = []
 
         let ides = []
 
@@ -137,21 +146,62 @@
         ).then((data) => {
             console.log(data)
             console.log('hey')
-            console.log(fetchedData)
+            //            console.log(fetchedData)
+
+            data[4].places.forEach((el) => {
+                let coordinates = el.contour_szz.map(points => points.reverse())
+
+                places.push({
+                    "type": "Feature",
+                    "proprties": {
+                        "id": el.id
+                    },
+                    "geometry": {
+                        type: "Polygon",
+                        coordinates: [coordinates]
+                    }
+                })
+            })
+
+            let helperKeys = ['dataRc20', "dataRc05", 'dataRuvv']
 
 
             data[2].seismoeventparams.forEach((el) => {
 
-                ides.push(el.seismoevent)
+                ides.push(el.id)
+                console.log(ides)
 
                 let coordinates = el.block_contuor.map(coordinates => coordinates.reverse())
                 //                coordinates.push(el.block_contuor[0].reverse())
-                const seismoevent = data[3].seismoevents.find(event => event.id == el.seismoevent)
+                const seismoevent = data[3].seismoevents.find(event => event.id == el.id)
+
+                for (const keyContuor of helperKeys) {
+
+                    console.log(keyContuor)
+
+
+                    if (Object.keys(el[keyContuor]).length > 0) {
+                        let coordinatesContuor = el[keyContuor].map(points => points.reverse())
+
+                        contuors.push({
+                            type: "Feature",
+                            properties: {
+                                id: el.id,
+                                type: keyContuor
+                            },
+                            geometry: {
+                                type: "Polygon",
+                                coordinates: [coordinatesContuor]
+                            }
+                        })
+                    }
+                }
+
 
                 blocks.push({
                     "type": "Feature",
                     "properties": {
-                        "id": el.seismoevent,
+                        "id": el.id,
                         "name": el.name,
                         "created": moment(seismoevent.created, 'YYYY-MM-DDTHH:mm:ss.SSSS'),
                         "time_actual": seismoevent.time_actual,
@@ -235,10 +285,28 @@
                                 "value": el.zaboika,
                                 "name": "Тип забойки",
                                 "type": ""
+                            },
+                            "Rc20": {
+                                "value": el.Rc20,
+                                "name": "Безопасное по сейсмике расстояние для промышленных зданий и сооружений",
+                                "type": "м"
+                            },
+                            "Rc05": {
+                                value: el.Rc05,
+                                name: "Безопасное по сейсмике расстояние для жилых зданий и сооружений",
+                                type: 'м'
+                            },
+                            "Ruvv": {
+                                value: el.Ruvv,
+                                name: "Безопасное расстояние по УВВ",
+                                type: 'м'
                             }
+                        },
+                        "contuors": {
+                            dataRc20: el.dataRc20,
+                            dataRc05: el.dataRc05,
+                            dataRuvv: el.dataRuvv
                         }
-
-                        //                            "explosive_type": el.explosive_type
                     },
                     "geometry": {
                         "type": "Polygon",
@@ -265,24 +333,11 @@
                 })
             })
 
-            //            fetchedData.map(data => data.data.then(data => console.log(data)))
-            //        })
-
-
-
-
-
-            //                    fetch('isolines_new.json')
-            //                        .then((response) => {
-            //                            return response.json();
-            //                        })
-            //                        .then((data) => {
-            //                            console.log(data)
             data[0].isolines.forEach((el, index) => {
-                Object.keys(el.data).forEach(key => {
+                Object.keys(el.data_gost).forEach(key => {
                     //                        console.log(key)
 
-                    const line = turf.lineString(el.data[key].map(coordinates => coordinates.reverse()))
+                    const line = turf.lineString(el.data_gost[key].map(coordinates => coordinates.reverse()))
 
                     const curvedLine = turf.bezierSpline(line, {
                         "sharpness": SHARPNESS,
@@ -293,7 +348,33 @@
                         "type": "Feature",
                         "properties": {
                             "power": +key,
-                            "id": el.seismoevent
+                            "id": el.seismoevent,
+                            "type": "data_gost"
+                        },
+                        "geometry": {
+                            "type": "LineString",
+                            "coordinates": curvedLine.geometry.coordinates
+                        }
+                    })
+                })
+
+
+                Object.keys(el.data_fnp).forEach(key => {
+                    //                        console.log(key)
+
+                    const line = turf.lineString(el.data_fnp[key].map(coordinates => coordinates.reverse()))
+
+                    const curvedLine = turf.bezierSpline(line, {
+                        "sharpness": SHARPNESS,
+                        "resolution": RESOLUTION
+                    })
+
+                    isolines.push({
+                        "type": "Feature",
+                        "properties": {
+                            "power": +key,
+                            "id": el.seismoevent,
+                            "type": "data_fnp"
                         },
                         "geometry": {
                             "type": "LineString",
@@ -302,6 +383,14 @@
                     })
                 })
             })
+
+
+
+
+            let featuresOfContours = {
+                type: "FeatureCollection",
+                features: contuors
+            }
 
             let featuresOfIsolines = {
                 "type": "FeatureCollection",
@@ -318,10 +407,18 @@
                 "features": blocks
             }
 
-            console.log('hey')
+            let featuresOfPlaces = {
+                "type": "FeatureCollection",
+                features: places
+            }
+
+            // OUTPUT ALL DATA THAT WILL BE DISPLAYED
+            console.log('TEST BLOCK')
             console.log(featuresOfIsolines)
             console.log(featuresOfPoints)
             console.log(featuresOfBlocks)
+            console.log(featuresOfPlaces)
+            console.log(featuresOfContours)
 
 
             //            const epicent = turf.polygon([
@@ -398,6 +495,41 @@
                 map.addSource('blocks-data', {
                     "type": "geojson",
                     "data": featuresOfBlocks
+                })
+
+                map.addSource('places-data', {
+                    type: "geojson",
+                    data: featuresOfPlaces
+                })
+
+                map.addSource('contuors-data', {
+                    type: 'geojson',
+                    data: featuresOfContours
+                })
+
+                map.addLayer({
+                    id: 'contuors-data-line',
+                    type: 'line',
+                    source: 'contuors-data',
+                    paint: {
+                        "line-width": 2,
+                        "line-color": "#000000",
+//                        'line-dasharray': [5, 1],
+                    }
+                })
+
+                map.addLayer({
+                    id: 'places-data-line',
+                    type: 'line',
+                    source: 'places-data',
+                    layout: {},
+                    paint: {
+                        "line-width": 2,
+                        "line-color": "#00a9ff",
+                        'line-dasharray': [2, 1],
+
+
+                    }
                 })
 
                 map.addLayer({
