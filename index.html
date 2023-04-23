@@ -22,6 +22,11 @@
 <body>
     <div id='map' style='width: 1400px; height: 1300px;'></div>
     <!--    <button id="zoomto" class="btn-control">Zoom to bounds</button>-->
+    <nav id="menu">
+        <a href="">dfsdf</a>
+        <a href="">dfsdf</a>
+        <p>dfsdf</p>
+    </nav>
 
 
     <div class="map-overlay">
@@ -149,16 +154,32 @@
             //            console.log(fetchedData)
 
             data[4].places.forEach((el) => {
-                let coordinates = el.contour_szz.map(points => points.reverse())
+
+                let coordinatesGo = el.contour_go.map(points => points.reverse().reverse())
+
+                let coordinatesSzz = el.contour_szz.map(points => points.reverse())
 
                 places.push({
                     "type": "Feature",
-                    "proprties": {
-                        "id": el.id
+                    "properties": {
+                        "id": el.id,
+                        type: "szz"
                     },
                     "geometry": {
                         type: "Polygon",
-                        coordinates: [coordinates]
+                        coordinates: [coordinatesSzz]
+                    }
+                })
+
+                places.push({
+                    "type": "Feature",
+                    "properties": {
+                        "id": el.id,
+                        type: "go"
+                    },
+                    "geometry": {
+                        type: "Polygon",
+                        coordinates: [coordinatesGo]
                     }
                 })
             })
@@ -508,21 +529,94 @@
                 })
 
                 map.addLayer({
-                    id: 'contuors-data-line',
+                    id: 'contuors-data-line-rc20',
                     type: 'line',
                     source: 'contuors-data',
+                    filter: ["==", "type", 'dataRc20'],
                     paint: {
                         "line-width": 2,
-                        "line-color": "#000000",
-//                        'line-dasharray': [5, 1],
+                        "line-color": "#f24be9",
+                        //                        'line-dasharray': [5, 1],
                     }
                 })
 
                 map.addLayer({
-                    id: 'places-data-line',
+                    id: 'contuors-data-line-rc05',
+                    type: 'line',
+                    source: 'contuors-data',
+                    filter: ["==", "type", 'dataRc05'],
+                    paint: {
+                        "line-width": 2,
+                        "line-color": "#1231bb",
+                        //                        'line-dasharray': [5, 1],
+                    }
+                })
+
+                map.addLayer({
+                    id: 'contuors-data-line-ruvv',
+                    type: 'line',
+                    source: 'contuors-data',
+                    filter: ["==", "type", 'dataRuvv'],
+                    paint: {
+                        "line-width": 2,
+                        "line-color": "#1ae153",
+                        //                        'line-dasharray': [5, 1],
+                    }
+                })
+
+
+                map.addLayer({
+                    id: 'contuors-data-fill-rc20',
+                    type: 'fill',
+                    source: 'contuors-data',
+                    filter: ["==", "type", 'dataRc20'],
+                    paint: {
+                        'fill-color': '#f24be9',
+                        'fill-opacity': 0.2
+                    }
+                })
+
+                map.addLayer({
+                    id: 'contuors-data-fill-rc05',
+                    type: 'fill',
+                    source: 'contuors-data',
+                    filter: ["==", "type", 'dataRc05'],
+                    paint: {
+                        'fill-color': '#1231bb',
+                        'fill-opacity': 0.2
+                    }
+                })
+
+                map.addLayer({
+                    id: 'contuors-data-fill-ruvv',
+                    type: 'fill',
+                    source: 'contuors-data',
+                    filter: ["==", "type", 'dataRuvv'],
+                    paint: {
+                        'fill-color': '#1ae153',
+                        'fill-opacity': 0.2
+                    }
+                })
+
+                map.addLayer({
+                    id: 'places-data-line-szz',
                     type: 'line',
                     source: 'places-data',
                     layout: {},
+                    filter: ["==", 'type', 'go'],
+                    paint: {
+                        "line-width": 2,
+                        "line-color": "#93a9f0",
+                        'line-dasharray': [2, 1],
+                    }
+                })
+
+                map.addLayer({
+                    id: 'places-data-line-go',
+                    type: 'line',
+                    source: 'places-data',
+                    layout: {},
+                    filter: ["==", 'type', 'szz'],
                     paint: {
                         "line-width": 2,
                         "line-color": "#00a9ff",
