@@ -866,122 +866,59 @@
 
                 // RIGHT FILTER MENU
 
-                const toggleableIsoliansProperty = [{
-                        id: 'isolines-data-lines-gost',
+                const toggleableLayersId = [{
+                        id: ['isolines-data-lines-gost'],
                         name: 'GOST'
                     },
                     {
-                        id: 'isolines-data-lines-fnp',
+                        id: ['isolines-data-lines-fnp'],
                         name: 'FNP'
+                    },
+                    {
+                        id: ['places-data-line-go'],
+                        name: 'go'
+                    }, {
+                        id: ['places-data-line-szz'],
+                        name: 'szz'
+                    }, {
+                        id: ['contuors-data-ruvv-line', 'contuors-data-ruvv-fill'],
+                        name: 'Ruvv'
+                    }, {
+                        id: ['contuors-data-rc20-line', 'contuors-data-rc20-fill'],
+                        name: 'Rc20'
+                    }, {
+                        id: ['contuors-data-rc05-line', "contuors-data-rc05-fill"],
+                        name: 'Rc05'
                     }
                 ]
 
-                const toggleablePlacesId = [{
-                    id: 'places-data-line-go',
-                    name: 'go'
-                }, {
-                    id: 'places-data-line-szz',
-                    name: 'szz'
-                }]
-
-                const toggleableContuorsId = [{
-                    id: 'contuors-data-ruvv',
-                    name: 'Ruvv'
-                }, {
-                    id: 'contuors-data-rc20',
-                    name: 'Rc20'
-                }, {
-                    id: 'contuors-data-rc05',
-                    name: 'Rc05'
-                }]
-
                 const menuContainer = document.getElementById('menu')
 
-                for (const layer of toggleableIsoliansProperty) {
+                for (const layer of toggleableLayersId) {
                     const link = document.createElement('a')
 
                     link.textContent = layer.name
                     link.href = '#'
                     link.className = 'active'
-                    link.id = layer.id
 
                     link.onclick = function(e) {
-                        const clickedLayer = this.id
+                        const clickedLayers = layer.id
+                        console.log(clickedLayers)
+
                         e.preventDefault()
                         e.stopPropagation()
 
-                        const visibility = map.getLayoutProperty(clickedLayer, 'visibility')
+                        const visibility = map.getLayoutProperty(clickedLayers.length > 1 ? clickedLayers[0] : clickedLayers, 'visibility')
 
                         if (visibility === 'visible') {
-                            map.setLayoutProperty(clickedLayer, 'visibility', 'none')
 
-                            this.className = ''
-
-                        } else {
-                            this.className = 'active'
-                            map.setLayoutProperty(clickedLayer, 'visibility', 'visible')
-                        }
-                    }
-
-                    menuContainer.appendChild(link)
-                }
-
-                for (const layer of toggleablePlacesId) {
-                    const link = document.createElement('a')
-                    link.id = layer.id
-                    link.href = '#'
-                    link.textContent = layer.name
-                    link.className = 'active'
-
-                    link.onclick = function(e) {
-                        const clickedLayer = this.id
-                        e.preventDefault()
-                        e.stopPropagation()
-
-                        const visibility = map.getLayoutProperty(clickedLayer, 'visibility')
-                        if (visibility === 'visible') {
-                            map.setLayoutProperty(clickedLayer, "visibility", 'none')
+                            clickedLayers.forEach(id => map.setLayoutProperty(id, 'visibility', 'none'))
 
                             this.className = ''
                         } else {
                             this.className = 'active'
-                            map.setLayoutProperty(clickedLayer, 'visibility', 'visible')
-                        }
 
-                    }
-
-                    menuContainer.appendChild(link)
-
-                }
-
-                for (const layer of toggleableContuorsId) {
-
-                    const link = document.createElement('a')
-                    link.id = layer.id
-                    link.href = '#'
-                    link.textContent = layer.name
-                    link.className = 'active'
-
-                    link.onclick = function(e) {
-                        const clickedLayer = this.id
-                        e.preventDefault()
-                        e.stopPropagation()
-
-
-                        const visibilityLine = map.getLayoutProperty(`${clickedLayer}-line`, 'visibility')
-
-                        const visibilityFill = map.getLayoutProperty(`${clickedLayer}-fill`, 'visibility')
-
-                        if (visibilityLine === 'visible' || visibilityFill === 'visible') {
-                            map.setLayoutProperty(`${clickedLayer}-line`, 'visibility', 'none')
-                            map.setLayoutProperty(`${clickedLayer}-fill`, 'visibility', 'none')
-
-                            this.className = ''
-
-                        } else {
-                            this.className = 'active'
-                            map.setLayoutProperty(`${clickedLayer}-line`, 'visibility', 'visible')
-                            map.setLayoutProperty(`${clickedLayer}-fill`, 'visibility', 'visible')
+                            clickedLayers.forEach(id => map.setLayoutProperty(id, 'visibility', 'visible'))
                         }
                     }
 
@@ -1316,9 +1253,6 @@
         //            //                'road-label-simple' // Add layer below labels
         //            //            );
         //        });
-
     </script>
 
-</body>
-
-</html>
+</body></html>
